@@ -180,7 +180,7 @@ func (r *OrganizationSpendAlertResource) Create(ctx context.Context, req resourc
 	if !data.NotificationChannelSubjectPrefix.IsNull() && !data.NotificationChannelSubjectPrefix.IsUnknown() {
 		openaiapi.SetBodyField(body, []string{"notification_channel", "subject_prefix"}, data.NotificationChannelSubjectPrefix.ValueString())
 	}
-	responseData, err := r.client.Request(ctx, "POST", "/organization/spend_alerts", pathParams, queryParams, body)
+	responseData, err := r.client.RequestWithoutRetries(ctx, "POST", "/organization/spend_alerts", pathParams, queryParams, body)
 	if err != nil {
 		resp.Diagnostics.AddError("OpenAI API request failed", err.Error())
 		return

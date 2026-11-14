@@ -153,7 +153,7 @@ func (r *CertificateResource) Create(ctx context.Context, req resource.CreateReq
 	body := map[string]any{}
 	openaiapi.AddStringBodyField(body, "name", data.Name)
 	openaiapi.AddStringBodyField(body, "certificate", data.Certificate)
-	responseData, err := r.client.Request(ctx, "POST", "/organization/certificates", pathParams, queryParams, body)
+	responseData, err := r.client.RequestWithoutRetries(ctx, "POST", "/organization/certificates", pathParams, queryParams, body)
 	if err != nil {
 		resp.Diagnostics.AddError("OpenAI API request failed", err.Error())
 		return

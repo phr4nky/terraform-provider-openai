@@ -143,7 +143,7 @@ func (r *ProjectServiceAccountResource) Create(ctx context.Context, req resource
 	body := map[string]any{}
 	openaiapi.SetBodyField(body, []string{"create_service_account_only"}, true)
 	openaiapi.AddStringBodyField(body, "name", data.Name)
-	responseData, err := r.client.Request(ctx, "POST", "/organization/projects/{project_id}/service_accounts", pathParams, queryParams, body)
+	responseData, err := r.client.RequestWithoutRetries(ctx, "POST", "/organization/projects/{project_id}/service_accounts", pathParams, queryParams, body)
 	if err != nil {
 		resp.Diagnostics.AddError("OpenAI API request failed", err.Error())
 		return

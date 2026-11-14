@@ -197,7 +197,7 @@ func (r *ProjectSpendAlertResource) Create(ctx context.Context, req resource.Cre
 	if !data.NotificationChannelSubjectPrefix.IsNull() && !data.NotificationChannelSubjectPrefix.IsUnknown() {
 		openaiapi.SetBodyField(body, []string{"notification_channel", "subject_prefix"}, data.NotificationChannelSubjectPrefix.ValueString())
 	}
-	responseData, err := r.client.Request(ctx, "POST", "/organization/projects/{project_id}/spend_alerts", pathParams, queryParams, body)
+	responseData, err := r.client.RequestWithoutRetries(ctx, "POST", "/organization/projects/{project_id}/spend_alerts", pathParams, queryParams, body)
 	if err != nil {
 		resp.Diagnostics.AddError("OpenAI API request failed", err.Error())
 		return
