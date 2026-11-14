@@ -199,6 +199,13 @@ func (r *CertificateResource) Read(ctx context.Context, req resource.ReadRequest
 		"certificate_id": data.CertificateID.ValueString(),
 	}
 	queryParams := map[string]string{}
+	// Import only knows the certificate ID. Fetch the PEM content once so an
+	// imported certificate matches its configuration instead of planning a
+	// replacement of the required, replace-on-change certificate attribute.
+	fetchContent := data.Certificate.IsNull()
+	if fetchContent {
+		queryParams["include[]"] = "content"
+	}
 	responseData, err := r.client.Request(ctx, "GET", "/organization/certificates/{certificate_id}", pathParams, queryParams, nil)
 	if err != nil {
 		if openaiapi.IsNotFound(err) {
@@ -207,6 +214,12 @@ func (r *CertificateResource) Read(ctx context.Context, req resource.ReadRequest
 		}
 		resp.Diagnostics.AddError("OpenAI API request failed", err.Error())
 		return
+	}
+	if fetchContent {
+		if err := openaiapi.ApplyStringResponseField(responseData, []string{"certificate_details.content"}, &data.Certificate, false); err != nil {
+			resp.Diagnostics.AddError("Invalid OpenAI API response", err.Error())
+			return
+		}
 	}
 	if err := openaiapi.ApplyStringResponseField(responseData, []string{"id"}, &data.CertificateID, true); err != nil {
 		resp.Diagnostics.AddError("Invalid OpenAI API response", err.Error())
