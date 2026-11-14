@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -23,6 +24,7 @@ import (
 var _ resource.Resource = &WorkloadIdentityProviderResource{}
 var _ resource.ResourceWithConfigure = &WorkloadIdentityProviderResource{}
 var _ resource.ResourceWithImportState = &WorkloadIdentityProviderResource{}
+var _ resource.ResourceWithModifyPlan = &WorkloadIdentityProviderResource{}
 
 type WorkloadIdentityProviderResource struct {
 	client *openaiapi.APIClient
@@ -151,6 +153,7 @@ func (r *WorkloadIdentityProviderResource) Schema(ctx context.Context, req resou
 				Computed:            true,
 				Sensitive:           false,
 				Validators:          []validator.Object{openaiapi.ObjectValueValidator("verification")},
+				PlanModifiers:       []planmodifier.Object{objectplanmodifier.UseStateForUnknown()},
 				Attributes: map[string]schema.Attribute{
 					"type": schema.StringAttribute{
 						MarkdownDescription: "type",
@@ -642,6 +645,12 @@ func (r *WorkloadIdentityProviderResource) Delete(ctx context.Context, req resou
 	}
 	_ = responseData
 	resp.State.RemoveResource(ctx)
+}
+
+// ModifyPlan keeps unchanged server-computed values when an unconfigured
+// Optional+Computed nested object would otherwise force a no-op update.
+func (r *WorkloadIdentityProviderResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	openaiapi.KeepComputedValuesWhenUnchanged(ctx, req, resp, "enabled", "created_at", "updated_at")
 }
 
 func (r *WorkloadIdentityProviderResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
