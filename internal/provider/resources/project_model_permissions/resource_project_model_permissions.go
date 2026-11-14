@@ -42,7 +42,7 @@ func (r *ProjectModelPermissionsResource) Metadata(ctx context.Context, req reso
 
 func (r *ProjectModelPermissionsResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Manage project model permissions.\n\nAuthentication: Set the admin_api_key provider attribute or OPENAI_ADMIN_KEY environment variable for the admin API audience.",
+		MarkdownDescription: "Manage project model permissions.\n\nDestroying this resource removes it from Terraform state only; the project's model permission policy is left unchanged. This keeps create_before_destroy replacements from resetting the policy the replacement just applied.\n\nAuthentication: Set the admin_api_key provider attribute or OPENAI_ADMIN_KEY environment variable for the admin API audience.",
 		Attributes: map[string]schema.Attribute{
 			"project_id": schema.StringAttribute{
 				MarkdownDescription: "project id",
@@ -259,32 +259,8 @@ func (r *ProjectModelPermissionsResource) Delete(ctx context.Context, req resour
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	if r.client == nil {
-		resp.Diagnostics.AddError("Missing OpenAI API client", "The provider was not configured before this operation ran.")
-		return
-	}
-	pathParams := map[string]string{
-		"project_id": data.ProjectID.ValueString(),
-	}
-	queryParams := map[string]string{}
-	if err := r.client.InvalidateResponseCache("project_rate_limits", []string{"project_id"}, pathParams); err != nil {
-		resp.Diagnostics.AddError("Invalid response cache key", err.Error())
-		return
-	}
-	responseData, err := r.client.Request(ctx, "DELETE", "/organization/projects/{project_id}/model_permissions", pathParams, queryParams, nil)
-	if err := r.client.InvalidateResponseCache("project_rate_limits", []string{"project_id"}, pathParams); err != nil {
-		resp.Diagnostics.AddError("Invalid response cache key", err.Error())
-		return
-	}
-	if err != nil {
-		if openaiapi.IsNotFound(err) {
-			resp.State.RemoveResource(ctx)
-			return
-		}
-		resp.Diagnostics.AddError("OpenAI API request failed", err.Error())
-		return
-	}
-	_ = responseData
+	// The policy is a per-project singleton. Deleting it here would also reset a
+	// live replacement during create_before_destroy, so destroy only forgets state.
 	resp.State.RemoveResource(ctx)
 }
 
