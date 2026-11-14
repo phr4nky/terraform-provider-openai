@@ -4,12 +4,15 @@ page_title: "openai_project_model_permissions Resource - openai"
 subcategory: ""
 description: |-
   Manage project model permissions.
+  Destroying this resource removes it from Terraform state only; the project's model permission policy is left unchanged. This keeps create_before_destroy replacements from resetting the policy the replacement just applied.
   Authentication: Set the admin_api_key provider attribute or OPENAI_ADMIN_KEY environment variable for the admin API audience.
 ---
 
 # openai_project_model_permissions (Resource)
 
 Manage project model permissions.
+
+Destroying this resource removes it from Terraform state only; the project's model permission policy is left unchanged. This keeps create_before_destroy replacements from resetting the policy the replacement just applied.
 
 Authentication: Set the admin_api_key provider attribute or OPENAI_ADMIN_KEY environment variable for the admin API audience.
 
