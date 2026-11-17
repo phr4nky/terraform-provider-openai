@@ -234,7 +234,7 @@ func (r *InviteResource) Create(ctx context.Context, req resource.CreateRequest,
 		}
 	}
 	openaiapi.SetBodyField(body, []string{"projects"}, projectsValue)
-	responseData, err := r.client.Request(ctx, "POST", "/organization/invites", pathParams, queryParams, body)
+	responseData, err := r.client.RequestWithoutRetries(ctx, "POST", "/organization/invites", pathParams, queryParams, body)
 	if err != nil {
 		resp.Diagnostics.AddError("OpenAI API request failed", err.Error())
 		return

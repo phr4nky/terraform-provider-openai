@@ -176,7 +176,7 @@ func (r *ProjectRoleResource) Create(ctx context.Context, req resource.CreateReq
 		openaiapi.SetBodyField(body, []string{"permissions"}, permissionsValue)
 	}
 	openaiapi.AddStringBodyField(body, "description", data.Description)
-	responseData, err := r.client.Request(ctx, "POST", "/projects/{project_id}/roles", pathParams, queryParams, body)
+	responseData, err := r.client.RequestWithoutRetries(ctx, "POST", "/projects/{project_id}/roles", pathParams, queryParams, body)
 	if err != nil {
 		resp.Diagnostics.AddError("OpenAI API request failed", err.Error())
 		return

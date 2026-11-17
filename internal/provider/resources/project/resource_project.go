@@ -163,7 +163,7 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 		resp.Diagnostics.AddError("Invalid response cache key", err.Error())
 		return
 	}
-	responseData, err := r.client.Request(ctx, "POST", "/organization/projects", pathParams, queryParams, body)
+	responseData, err := r.client.RequestWithoutRetries(ctx, "POST", "/organization/projects", pathParams, queryParams, body)
 	if err := r.client.InvalidateResponseCache("organization_projects", []string{}, pathParams); err != nil {
 		resp.Diagnostics.AddError("Invalid response cache key", err.Error())
 		return
